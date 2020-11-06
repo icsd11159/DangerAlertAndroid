@@ -10,25 +10,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <TextView
-            android:id="@+id/string"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/thank_you"
-            android:layout_below="@+id/spinner"
-            android:textSize="25sp"/>
-
-
-
     <TextView
-        android:id="@+id/Login"
+        android:id="@+id/string"
         android:layout_width="122dp"
         android:layout_height="52dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="69dp"
         android:layout_below="@+id/spinner"
-        android:text="Welcome!"
+        android:text="@string/thank_you"
         android:textColor="#7C0606"
         android:textSize="24sp"
         android:visibility="visible"
@@ -104,7 +94,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="visible"
-        android:layout_below="@+id/Login"
+        android:layout_below="@+id/string"
         android:layout_marginTop="25dp"
         android:ems="10"
         android:inputType="textEmailAddress"/>

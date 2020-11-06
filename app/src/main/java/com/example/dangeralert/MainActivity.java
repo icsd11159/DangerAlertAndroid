@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                                 FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
 
                                 userid=currentFirebaseUser.getUid();
-                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                Intent intent = new Intent(getApplicationContext(), Menu.class);
                                 intent.putExtra("userid", userid);
                                 startActivity(intent);
                                 finish();
