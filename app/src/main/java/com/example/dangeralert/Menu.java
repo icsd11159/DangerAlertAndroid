@@ -1,19 +1,26 @@
 package com.example.dangeralert;
 
 import android.Manifest;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+//import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -28,6 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -41,13 +49,17 @@ import com.google.firebase.storage.UploadTask;
 import android.app.ProgressDialog;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 
-public class Menu extends AppCompatActivity {
-    TextView mymail, myspeed,mycurrentspeed;
+public class Menu extends AppCompatActivity  implements SensorEventListener {
+    TextView mymail, myspeed,mycurrentspeed,count;
+    boolean Aborded=false,setV=false;
     SensorManager sensorManager;
     TextView myTextView;
+    Sensor accelerometer;
     FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
     public final String userid=currentFirebaseUser.getUid();
     String email,phoneNo1,phoneNo2,phoneNo3;
@@ -62,13 +74,13 @@ public class Menu extends AppCompatActivity {
     Button b1;
     SharedPreferences sharedpreferences;
     // views for button
-    private Button btnSelect, btnUpload,clear;
+    private Button btnSelect, btnUpload,clear,abord;
     SmsManager smsManager ;
     ArrayList<String> msgArray ;
     double latitude,longitude;
     // view for image view
     private ImageView imageView;
-
+    private final static String default_notification_channel_id = "default";
     // Uri indicates, where the image will be picked from
     private Uri filePath;
 
@@ -87,12 +99,14 @@ public class Menu extends AppCompatActivity {
        // mymail = (TextView) findViewById(R.id.mail);
         myspeed = (TextView) findViewById(R.id.myspeed);
         mycurrentspeed = (TextView) findViewById(R.id.mycurrentspeed);
-
+        count = (TextView) findViewById(R.id.count);
+        count.setVisibility(View.INVISIBLE);
         ed1=(EditText)findViewById(R.id.editText);
         ed2=(EditText)findViewById(R.id.editText2);
         ed3=(EditText)findViewById(R.id.editText3);
-
+        if(setV==true){count.setVisibility(View.VISIBLE);}
         b1=(Button)findViewById(R.id.button);
+        abord=(Button)findViewById(R.id.abord);
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
         if (sharedpreferences.contains(Phone1)) {
             ed1.setText(sharedpreferences.getString(Phone1, ""));
@@ -146,7 +160,14 @@ public class Menu extends AppCompatActivity {
                 SelectImage();
             }
         });
-
+        abord.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                Aborded=true;
+              //  count.setVisibility(View.INVISIBLE);
+            }
+        });
         // on pressing btnUpload uploadImage() is called
         btnUpload.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,8 +183,20 @@ public class Menu extends AppCompatActivity {
                 clearImage();
             }
         });
-    }
 
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(Menu.this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+
+
+
+    }
+    private void abortingMessage(int counts) {
+        count.setText( Integer.toString(counts));
+
+
+       // Log.d("update","yes");
+    }
 public void getLocation(){
     try {
         if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
@@ -232,9 +265,54 @@ public void getLocation(){
             }
         }
     }
+    public void sendFallingAlert() {
+        getLocation();
+        sharedpreferences = getSharedPreferences(MyPREFERENCES,
+                Context.MODE_PRIVATE);
+
+        phoneNo1 =  "tel:"+sharedpreferences.getString(Phone1, "");
+        phoneNo2 =  "tel:"+sharedpreferences.getString(Phone2, "");
+        phoneNo3 =  "tel:"+sharedpreferences.getString(Phone3, "");
+        message = "Έπεσα στο : "+String.valueOf(latitude) +" και γεωγραφικό πλάτος :"+String.valueOf(longitude) +" και βρισκομαι σε κίνδυνο";
+
+        smsManager = SmsManager.getDefault();
+        msgArray = smsManager.divideMessage(message);
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.SEND_SMS)) {
+
+            } else {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.SEND_SMS},
+                        MY_PERMISSIONS_REQUEST_SEND_SMS);
+            }
+        }
+        else{
+            Log.d("Sending SMS", "YES");
+            if(!phoneNo1.trim().equals("tel:")  && phoneNo1!=null && !phoneNo1.isEmpty() && phoneNo1!="tel:") {
+                smsManager.sendMultipartTextMessage(phoneNo1, null, msgArray, null, null);
+                Toast.makeText(getApplicationContext(), "SMS FALLING alert has sent to " + phoneNo1,
+                        Toast.LENGTH_LONG).show();
+            }
+            Log.d("Sending SMS", phoneNo2 +":vdfv");
+            if(!phoneNo2.trim().equals("tel:") && phoneNo2!=null && !phoneNo2.isEmpty() && phoneNo2!="tel:") {
+                smsManager.sendMultipartTextMessage(phoneNo2, null, msgArray, null, null);
+                Toast.makeText(getApplicationContext(), "SMS FALLING alert has sent to " + phoneNo2,
+                        Toast.LENGTH_LONG).show();
+            }
+            if(!phoneNo3.trim().equals("tel:")  && phoneNo3!=null && !phoneNo3.isEmpty() && phoneNo3!="tel:") {
+                smsManager.sendMultipartTextMessage(phoneNo3, null, msgArray, null, null);
+                Toast.makeText(getApplicationContext(), "SMS FALLING alert has sent to " + phoneNo3,
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
-        Log.d("GPS onrew", "GPS Enabled");
+
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_SEND_SMS: {
                 if (grantResults.length > 0
@@ -242,23 +320,23 @@ public void getLocation(){
                     SmsManager smsManager = SmsManager.getDefault();
                     if(!phoneNo1.trim().equals("tel:")  && phoneNo1!=null && !phoneNo1.isEmpty() && phoneNo1!="tel:") {
                         smsManager.sendMultipartTextMessage(phoneNo1, null, msgArray, null, null);
-                        Toast.makeText(getApplicationContext(), "SMS Fire alert has sent to " + phoneNo1,
+                        Toast.makeText(getApplicationContext(), "SMS FALLING alert has sent to " + phoneNo1,
                                 Toast.LENGTH_LONG).show();
                     }
                     Log.d("Sending SMS", phoneNo2 +":vdfv");
                     if(!phoneNo2.trim().equals("tel:") && phoneNo2!=null && !phoneNo2.isEmpty() && phoneNo2!="tel:") {
                         smsManager.sendMultipartTextMessage(phoneNo2, null, msgArray, null, null);
-                        Toast.makeText(getApplicationContext(), "SMS Fire alert has sent to " + phoneNo2,
+                        Toast.makeText(getApplicationContext(), "SMS FALLING alert has sent to " + phoneNo2,
                                 Toast.LENGTH_LONG).show();
                     }
                     if(!phoneNo3.trim().equals("tel:")  && phoneNo3!=null && !phoneNo3.isEmpty() && phoneNo3!="tel:") {
                         smsManager.sendMultipartTextMessage(phoneNo3, null, msgArray, null, null);
-                        Toast.makeText(getApplicationContext(), "SMS Fire alert has sent to " + phoneNo3,
+                        Toast.makeText(getApplicationContext(), "SMS FALLING alert has sent to " + phoneNo3,
                                 Toast.LENGTH_LONG).show();
                     }
                 } else {
                     Toast.makeText(getApplicationContext(),
-                            "SMS faild, please try again.", Toast.LENGTH_LONG).show();
+                            "SMS FALLING failed, please try again.", Toast.LENGTH_LONG).show();
                     return;
                 }
             }
@@ -316,7 +394,7 @@ public void getLocation(){
                                 getContentResolver(),
                                 filePath);
 
-                Bitmap d = new BitmapDrawable(getApplicationContext().getResources() , filePath.toString()).getBitmap();
+               // Bitmap d = new BitmapDrawable(getApplicationContext().getResources() , filePath.toString()).getBitmap();
                // Bitmap bitmap = BitmapFactory.decodeFile(filePath.getPath());
                 int nh = (int) ( bitmap.getHeight() * (512.0 / bitmap.getWidth()) );
                 Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 512, nh, true);
@@ -414,5 +492,103 @@ private void clearImage(){
                                 }
                             });
         }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+
+
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            double loX = event.values[0];
+            double loY = event.values[1];
+            double loZ = event.values[2];
+
+            double loAccelerationReader = Math.sqrt(Math.pow(loX, 2)
+                    + Math.pow(loY, 2)
+                    + Math.pow(loZ, 2));
+            long mlPreviousTime = System.currentTimeMillis();
+           // Log.d( "loX : " , loX + " loY : " + loY + " loZ : " + loZ);
+            boolean moIsMin = false;
+            if (loAccelerationReader <= 6.0) {
+                moIsMin = true;
+                Log.i("TAG", "min");
+            }
+
+            int i=0;
+            boolean moIsMax = false;
+            if (moIsMin) {
+                i++;
+              Log.i("TAG", " loAcceleration : " + loAccelerationReader);
+               // loAccelerationReader=31;
+                if (loAccelerationReader >= 30) {
+                    long llCurrentTime = System.currentTimeMillis();
+                    long llTimeDiff = llCurrentTime - mlPreviousTime;
+                  //  Log.i("TAG", "loTime :" + llTimeDiff);
+                    //llTimeDiff=11;
+                    if (llTimeDiff >= 10) {
+                        moIsMax = true;
+                        Log.i("TAG", "max");
+                    }
+                }
+
+            }
+
+            if (moIsMin && moIsMax) {
+                Log.d("LOG_TAG", "x:"+loX +";y:"+loY+";z:"+loZ);
+                Log.d( "onsensor","epese");
+                Log.i("TAG", "loX : " + loX + " loY : " + loY + " loZ : " + loZ);
+                Log.i("TAG", "FALL DETECTED!!!!!");
+                Toast.makeText(Menu.this, "FALL DETECTED!!!!!The SMS alert will be sent to 30 second!If you don't want to send SMS press Abort", Toast.LENGTH_LONG).show();
+                Timer updateTimer = new Timer("velocityUpdate");
+
+                updateTimer.scheduleAtFixedRate(new TimerTask() {
+                    int ab = 30;
+                    public void run() {
+                        setV=true;
+                        abortingMessage(30);
+                        Uri alarmSound =
+                                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                        MediaPlayer mp = MediaPlayer.create(getApplicationContext(), alarmSound);
+                        mp.start();
+                        NotificationCompat.Builder mBuilder =
+                                new NotificationCompat.Builder(Menu.this, default_notification_channel_id)
+                                        .setSmallIcon(R.drawable.ic_launcher_foreground)
+                                        .setContentTitle("FallingAlert")
+                                        .setContentText("The message will send in: "+ab+"sec");
+                        NotificationManager mNotificationManager = (NotificationManager)
+                                getSystemService(Context.NOTIFICATION_SERVICE);
+                        mNotificationManager.notify((int) System.currentTimeMillis(),
+                                mBuilder.build());
+
+                        ab--;
+                    }
+                }, 0, 1000);
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        if(Aborded==false) {
+                            sendFallingAlert();
+                            count.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                }, 30000);
+                i = 0;
+                moIsMin = false;
+                moIsMax = false;
+
+            }
+
+            if (i > 5) {
+                i = 0;
+                moIsMin = false;
+                moIsMax = false;
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        Log.d( "onAccuracyChanged","onAccuracyChanged");
     }
 }

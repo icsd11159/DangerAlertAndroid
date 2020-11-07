@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -110,14 +111,17 @@
         android:textColorHint="#255357" />
 
     <Button
-        android:id="@+id/speedmap"
+        android:id="@+id/abord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/myspeedlist"
         android:layout_marginTop="10dp"
-        android:onClick="goToActivityspeedMap"
+        android:onClick="abord"
         android:text="Abort"
         android:textColor="#3D9886" />
+
+
+
     <Button
         android:id="@+id/signout"
         android:layout_width="wrap_content"
@@ -138,7 +142,21 @@
         android:textSize="18sp"
         android:textStyle="bold" />
 
-<LinearLayout
+    <TextView
+        android:id="@+id/count"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignTop="@id/editText"
+        android:layout_marginLeft="200dp"
+        android:layout_marginTop="34dp"
+        android:layout_weight="1"
+        android:background="#B9E3F6"
+        android:text="30"
+        android:textColor="#8A1434"
+        android:textSize="30sp"
+        app:autoSizeTextType="uniform" />
+
+    <LinearLayout
 android:id="@+id/linear"
 android:layout_height="50dp"
 android:layout_below="@+id/menu"
@@ -147,7 +165,7 @@ android:layout_width="wrap_content">
         <!--Button for choosing image from gallery-->
         <Button
             android:id="@+id/btnChoose"
-            android:text="Choose Fire's Photo"
+            android:text="Choose Photo"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -162,7 +180,7 @@ android:layout_width="wrap_content">
             android:layout_height="wrap_content" />
     <Button
         android:id="@+id/clear"
-        android:text="Clear Photo"
+        android:text="Clear"
         android:layout_weight="1"
         android:layout_below="@+id/btnUpload"
         android:layout_width="wrap_content"
