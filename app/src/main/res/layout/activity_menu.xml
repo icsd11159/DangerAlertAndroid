@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!--Linear Layout with horizontal orientation
+     and other properties-->
+
+
+
+
+  <!--  <TextView
+        android:id="@+id/user"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_below="@+id/menu"
+        android:layout_marginTop="4dp"
+        android:text="My Firebase's DB UserID is:"
+        android:textColor="#188775" />
+-->
+    <TextView
+        android:id="@+id/mail"
+        android:layout_width="250dp"
+        android:layout_marginTop="15dp"
+        android:layout_height="20dp"
+        android:textColor="#171515" />
+
+
+
+    <TextView
+        android:id="@+id/mycurrentspeed"
+        android:layout_width="400dp"
+        android:layout_height="29dp"
+        android:layout_below="@+id/imgView"
+        android:layout_marginTop="10dp"
+        android:text="Save your emergency numbers:"
+        android:textColor="#8A1434"
+        android:textSize="16sp" />
+    <TextView
+        android:id="@+id/myspeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/mycurrentspeed"
+        android:layout_marginTop="10dp"
+        android:autoText="true"
+        android:background="#EC2525"
+        android:textColor="#151313"
+        android:textSize="24sp" />
+
+
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText"
+        android:layout_below="@+id/myspeed"
+        android:layout_marginTop="5dp"
+        android:hint="Phone1"
+        android:inputType="phone"
+        android:digits="0123456789+"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText2"
+        android:inputType="phone"
+        android:digits="0123456789+"
+        android:layout_below="@+id/editText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:hint="Phone2" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText3"
+        android:inputType="phone"
+        android:digits="0123456789+"
+        android:layout_below="@+id/editText2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:hint="Phone3" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:id="@+id/button"
+        android:layout_below="@+id/editText3"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+       />
+    <Button
+        android:id="@+id/myspeedlist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button"
+        android:layout_marginTop="5dp"
+        android:onClick="sendFireAlert"
+        android:text="FIRE"
+        android:textColor="#D21717"
+        android:textColorHint="#255357" />
+
+    <Button
+        android:id="@+id/speedmap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/myspeedlist"
+        android:layout_marginTop="10dp"
+        android:onClick="goToActivityspeedMap"
+        android:text="Abort"
+        android:textColor="#3D9886" />
+    <Button
+        android:id="@+id/signout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="300dp"
+        android:onClick="signout"
+        android:text="SignOut"
+        android:textColor="#3D9886" />
+    <TextView
+        android:id="@+id/menu"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/signout"
+        android:text="Fire Alert"
+        android:textColor="#871844"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+<LinearLayout
+android:id="@+id/linear"
+android:layout_height="50dp"
+android:layout_below="@+id/menu"
+android:orientation="horizontal"
+android:layout_width="wrap_content">
+        <!--Button for choosing image from gallery-->
+        <Button
+            android:id="@+id/btnChoose"
+            android:text="Choose Fire's Photo"
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!--Button for uploading image-->
+        <Button
+            android:id="@+id/btnUpload"
+            android:text="Upload"
+            android:layout_weight="1"
+            android:layout_below="@+id/btnChoose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/clear"
+        android:text="Clear Photo"
+        android:layout_weight="1"
+        android:layout_below="@+id/btnUpload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    </LinearLayout>
+    <!--Image View for showing image choosen from gallery-->
+    <ImageView
+        android:id="@+id/imgView"
+        android:layout_weight="1"
+        android:layout_below="@+id/linear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+</RelativeLayout>
