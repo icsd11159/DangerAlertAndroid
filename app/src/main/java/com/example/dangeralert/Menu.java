@@ -21,6 +21,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -59,7 +60,9 @@ public class Menu extends AppCompatActivity  implements SensorEventListener {
     boolean Aborded=false,setV=false;
     SensorManager sensorManager;
     TextView myTextView;
+    MediaPlayer mp=null;
     Sensor accelerometer;
+
     FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
     public final String userid=currentFirebaseUser.getUid();
     String email,phoneNo1,phoneNo2,phoneNo3;
@@ -70,6 +73,7 @@ public class Menu extends AppCompatActivity  implements SensorEventListener {
     public static final String Phone1 = "Phone1key";
     public static final String Phone2 = "Phone2key";
     public static final String Phone3 = "Phone3key";
+    public boolean start=true;
     EditText ed1,ed2,ed3;
     Button b1;
     SharedPreferences sharedpreferences;
@@ -83,7 +87,7 @@ public class Menu extends AppCompatActivity  implements SensorEventListener {
     private final static String default_notification_channel_id = "default";
     // Uri indicates, where the image will be picked from
     private Uri filePath;
-
+     public int ab;
     // request code
     private final int PICK_IMAGE_REQUEST = 22;
 
@@ -91,6 +95,8 @@ public class Menu extends AppCompatActivity  implements SensorEventListener {
     FirebaseStorage storage;
     StorageReference storageReference;
     String message;
+    private Thread thread;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,11 +106,11 @@ public class Menu extends AppCompatActivity  implements SensorEventListener {
         myspeed = (TextView) findViewById(R.id.myspeed);
         mycurrentspeed = (TextView) findViewById(R.id.mycurrentspeed);
         count = (TextView) findViewById(R.id.count);
-        count.setVisibility(View.INVISIBLE);
+        //count.setVisibility(View.INVISIBLE);
         ed1=(EditText)findViewById(R.id.editText);
         ed2=(EditText)findViewById(R.id.editText2);
         ed3=(EditText)findViewById(R.id.editText3);
-        if(setV==true){count.setVisibility(View.VISIBLE);}
+
         b1=(Button)findViewById(R.id.button);
         abord=(Button)findViewById(R.id.abord);
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
@@ -165,6 +171,12 @@ public class Menu extends AppCompatActivity  implements SensorEventListener {
             public void onClick(View v)
             {
                 Aborded=true;
+                if(mp!=null) {
+                    mp.stop();
+                    setVisibilitys("false");
+                    ab=0;
+                    start=true;
+                }
               //  count.setVisibility(View.INVISIBLE);
             }
         });
@@ -191,12 +203,8 @@ public class Menu extends AppCompatActivity  implements SensorEventListener {
 
 
     }
-    private void abortingMessage(int counts) {
-        count.setText( Integer.toString(counts));
 
 
-       // Log.d("update","yes");
-    }
 public void getLocation(){
     try {
         if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
@@ -266,6 +274,7 @@ public void getLocation(){
         }
     }
     public void sendFallingAlert() {
+        ab=0;
         getLocation();
         sharedpreferences = getSharedPreferences(MyPREFERENCES,
                 Context.MODE_PRIVATE);
@@ -493,12 +502,32 @@ private void clearImage(){
                             });
         }
     }
+public void setVisibilitys(String t){
+    final String f=t;
+        if(String.valueOf(t)=="true"){
+            runOnUiThread(new Runnable() {
 
+                @Override
+                public void run() {
+                    Log.i("setvosibility", f);
+                    count.setVisibility(View.VISIBLE);
+                }
+            });
+        }else{
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.i("setvosinvisibility", f);
+                    count.setVisibility(View.INVISIBLE);
+                }
+            });
+        }
+}
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-
-
+        if (start == true){
+            ab = 0;
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             double loX = event.values[0];
             double loY = event.values[1];
@@ -508,25 +537,26 @@ private void clearImage(){
                     + Math.pow(loY, 2)
                     + Math.pow(loZ, 2));
             long mlPreviousTime = System.currentTimeMillis();
-           // Log.d( "loX : " , loX + " loY : " + loY + " loZ : " + loZ);
+            // Log.d( "loX : " , loX + " loY : " + loY + " loZ : " + loZ);
             boolean moIsMin = false;
             if (loAccelerationReader <= 6.0) {
                 moIsMin = true;
                 Log.i("TAG", "min");
             }
 
-            int i=0;
+            int i = 0;
             boolean moIsMax = false;
             if (moIsMin) {
                 i++;
-              Log.i("TAG", " loAcceleration : " + loAccelerationReader);
-               // loAccelerationReader=31;
-                if (loAccelerationReader >= 30) {
+                Log.i("TAG", " loAcceleration : " + loAccelerationReader);
+              //  loAccelerationReader = 31;
+                if (loAccelerationReader >= 5) {
                     long llCurrentTime = System.currentTimeMillis();
                     long llTimeDiff = llCurrentTime - mlPreviousTime;
-                  //  Log.i("TAG", "loTime :" + llTimeDiff);
-                    //llTimeDiff=11;
-                    if (llTimeDiff >= 10) {
+                    //  Log.i("TAG", "loTime :" + llTimeDiff);
+                   // llTimeDiff = 11;
+                    Log.i("TAG", " llTimeDiff : " + llTimeDiff);
+                    if (llTimeDiff >= 2) {
                         moIsMax = true;
                         Log.i("TAG", "max");
                     }
@@ -535,44 +565,57 @@ private void clearImage(){
             }
 
             if (moIsMin && moIsMax) {
-                Log.d("LOG_TAG", "x:"+loX +";y:"+loY+";z:"+loZ);
-                Log.d( "onsensor","epese");
+                Log.d("LOG_TAG", "x:" + loX + ";y:" + loY + ";z:" + loZ);
+                Log.d("onsensor", "epese");
                 Log.i("TAG", "loX : " + loX + " loY : " + loY + " loZ : " + loZ);
                 Log.i("TAG", "FALL DETECTED!!!!!");
                 Toast.makeText(Menu.this, "FALL DETECTED!!!!!The SMS alert will be sent to 30 second!If you don't want to send SMS press Abort", Toast.LENGTH_LONG).show();
-                Timer updateTimer = new Timer("velocityUpdate");
+                final Timer updateTimer = new Timer("velocityUpdate");
+                Uri alarmSound =
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                mp = MediaPlayer.create(getApplicationContext(), alarmSound);
+                mp.start();
+                ab = 30;
 
+                setVisibilitys("true");
+                start=false;
                 updateTimer.scheduleAtFixedRate(new TimerTask() {
-                    int ab = 30;
+
                     public void run() {
-                        setV=true;
-                        abortingMessage(30);
-                        Uri alarmSound =
-                                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                        MediaPlayer mp = MediaPlayer.create(getApplicationContext(), alarmSound);
-                        mp.start();
-                        NotificationCompat.Builder mBuilder =
-                                new NotificationCompat.Builder(Menu.this, default_notification_channel_id)
-                                        .setSmallIcon(R.drawable.ic_launcher_foreground)
-                                        .setContentTitle("FallingAlert")
-                                        .setContentText("The message will send in: "+ab+"sec");
-                        NotificationManager mNotificationManager = (NotificationManager)
-                                getSystemService(Context.NOTIFICATION_SERVICE);
-                        mNotificationManager.notify((int) System.currentTimeMillis(),
-                                mBuilder.build());
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                count.setText(String.valueOf(ab));
+                            }
+                        });
+                        Log.d("RUNinjnn: ", String.valueOf(ab));
 
                         ab--;
+                        if (ab == -1) {
+                            updateTimer.cancel();
+
+                        }
                     }
                 }, 0, 1000);
+                // ab = 0;
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
+
                     public void run() {
-                        if(Aborded==false) {
+                        Log.d("handler: ", "yes");
+                        if (Aborded == false) {
+
+                            mp.stop();
                             sendFallingAlert();
-                            count.setVisibility(View.INVISIBLE);
+                            start=true;
+                            setVisibilitys("false");
+                            ab=0;
                         }
                     }
                 }, 30000);
+
+
                 i = 0;
                 moIsMin = false;
                 moIsMax = false;
@@ -585,6 +628,7 @@ private void clearImage(){
                 moIsMax = false;
             }
         }
+    }
     }
 
     @Override
