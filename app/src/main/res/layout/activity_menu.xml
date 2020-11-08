@@ -113,7 +113,7 @@
         android:id="@+id/AlarmList"
         android:layout_weight="1"
         android:layout_below="@+id/signout"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="MyAlarms"

@@ -17,6 +17,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -106,7 +107,8 @@ public class Menu extends AppCompatActivity  implements SensorEventListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
-       // mymail = (TextView) findViewById(R.id.mail);
+        mymail = (TextView) findViewById(R.id.mail);
+        mymail.setText(userid);
         myspeed = (TextView) findViewById(R.id.myspeed);
         mycurrentspeed = (TextView) findViewById(R.id.mycurrentspeed);
         count = (TextView) findViewById(R.id.count);
@@ -175,15 +177,15 @@ public class Menu extends AppCompatActivity  implements SensorEventListener {
             public void onClick(View v)
             {
                 Aborded=true;
-                if(mp!=null) {
-                    mp.stop();
+
+
                     setVisibilitys("false");
                     ab=0;
                     start=true;
                     saveAlarmToDB("abort");
                     Toast.makeText(getApplicationContext(), "The message aborted " ,
                             Toast.LENGTH_LONG).show();
-                }
+
               //  count.setVisibility(View.INVISIBLE);
             }
         });
@@ -603,10 +605,10 @@ public void setVisibilitys(String t){
                 Log.i("TAG", "FALL DETECTED!!!!!");
                 Toast.makeText(Menu.this, "FALL DETECTED!!!!!The SMS alert will be sent to 30 second!If you don't want to send SMS press Abort", Toast.LENGTH_LONG).show();
                 final Timer updateTimer = new Timer("velocityUpdate");
-                Uri alarmSound =
-                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                mp = MediaPlayer.create(getApplicationContext(), alarmSound);
-                mp.start();
+
+                final Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                final Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+
                 ab = 30;
 
                 setVisibilitys("true");
@@ -623,6 +625,7 @@ public void setVisibilitys(String t){
                         });
                         Log.d("RUNinjnn: ", String.valueOf(ab));
 
+                        r.play();
                         ab--;
                         if (ab == -1) {
                             updateTimer.cancel();
@@ -638,7 +641,7 @@ public void setVisibilitys(String t){
                         Log.d("handler: ", "yes");
                         if (Aborded == false) {
 
-                            mp.stop();
+
                             sendFallingAlert();
                             start=true;
                             setVisibilitys("false");
