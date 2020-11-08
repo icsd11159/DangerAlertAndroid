@@ -8,17 +8,6 @@
      and other properties-->
 
 
-
-
-  <!--  <TextView
-        android:id="@+id/user"
-        android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:layout_below="@+id/menu"
-        android:layout_marginTop="4dp"
-        android:text="My Firebase's DB UserID is:"
-        android:textColor="#188775" />
--->
     <TextView
         android:id="@+id/mail"
         android:layout_width="250dp"
@@ -115,12 +104,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/myspeedlist"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:onClick="abord"
         android:text="Abort"
         android:textColor="#3D9886" />
 
-
+    <Button
+        android:id="@+id/AlarmList"
+        android:layout_weight="1"
+        android:layout_below="@+id/signout"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="MyAlarms"
+        android:text="My Alarms"
+        android:textColor="#3D9886"
+        android:textColorHint="#255357" />
 
     <Button
         android:id="@+id/signout"
@@ -134,9 +133,9 @@
     <TextView
         android:id="@+id/menu"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_height="30dp"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/signout"
+        android:layout_below="@+id/AlarmList"
         android:text="Fire Alert"
         android:textColor="#871844"
         android:textSize="18sp"

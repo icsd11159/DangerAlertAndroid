@@ -43,13 +43,17 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import android.app.ProgressDialog;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -176,6 +180,9 @@ public class Menu extends AppCompatActivity  implements SensorEventListener {
                     setVisibilitys("false");
                     ab=0;
                     start=true;
+                    saveAlarmToDB("abort");
+                    Toast.makeText(getApplicationContext(), "The message aborted " ,
+                            Toast.LENGTH_LONG).show();
                 }
               //  count.setVisibility(View.INVISIBLE);
             }
@@ -219,8 +226,7 @@ public void getLocation(){
     if(gpsTracker.canGetLocation()){
         latitude = gpsTracker.getLatitude();
         longitude = gpsTracker.getLongitude();
-        // tvLatitude.setText(String.valueOf(latitude));
-        // tvLongitude.setText(String.valueOf(longitude));
+
         Log.d("GPS Enabled", "GPS Enabled");
 
     }else{
@@ -236,7 +242,9 @@ public void getLocation(){
         phoneNo1 =  "tel:"+sharedpreferences.getString(Phone1, "");
         phoneNo2 =  "tel:"+sharedpreferences.getString(Phone2, "");
         phoneNo3 =  "tel:"+sharedpreferences.getString(Phone3, "");
-        message = "Βρίσκομαι στην τοποθεσία με γεωγραφικό μήκος : "+String.valueOf(latitude) +" και γεωγραφικό πλάτος :"+String.valueOf(longitude) +" και παρατηρώ μια πυρκαγιά";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss");
+        String ts = simpleDateFormat.format(new Date());
+        message = "Βρίσκομαι στην τοποθεσία με γεωγραφικό μήκος : "+String.valueOf(latitude) +" και γεωγραφικό πλάτος :"+String.valueOf(longitude) +" και παρατηρώ μια πυρκαγιά.Timestamp:"+ts;
 
         smsManager = SmsManager.getDefault();
         msgArray = smsManager.divideMessage(message);
@@ -272,6 +280,23 @@ public void getLocation(){
                         Toast.LENGTH_LONG).show();
             }
         }
+        //apothikefsi tou sumvantos sthn vasi
+       saveAlarmToDB("fire");
+    }
+    public void saveAlarmToDB(String event){
+        getLocation();
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
+        //   userid=currentFirebaseUser.getUid();
+        final DatabaseReference myRef = database.getReference(userid);
+        // final DatabaseReference myspeedlimit = database.getReference("speedLimit");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss");
+        String ts = simpleDateFormat.format(new Date());
+        myRef.child(ts).push();
+        String key = myRef.child(ts).getKey();
+        myRef.child(key).child("alarm").setValue(event);
+        myRef.child(key).child("longtitude").setValue(String.valueOf(longitude));
+        myRef.child(key).child("latitude").setValue(String.valueOf(latitude));
     }
     public void sendFallingAlert() {
         ab=0;
@@ -282,7 +307,9 @@ public void getLocation(){
         phoneNo1 =  "tel:"+sharedpreferences.getString(Phone1, "");
         phoneNo2 =  "tel:"+sharedpreferences.getString(Phone2, "");
         phoneNo3 =  "tel:"+sharedpreferences.getString(Phone3, "");
-        message = "Έπεσα στο : "+String.valueOf(latitude) +" και γεωγραφικό πλάτος :"+String.valueOf(longitude) +" και βρισκομαι σε κίνδυνο";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss");
+        String ts = simpleDateFormat.format(new Date());
+        message = "Έπεσα στο : "+String.valueOf(latitude) +" και γεωγραφικό πλάτος :"+String.valueOf(longitude) +" και βρισκομαι σε κίνδυνο.Timestamp:"+ts;
 
         smsManager = SmsManager.getDefault();
         msgArray = smsManager.divideMessage(message);
@@ -318,6 +345,7 @@ public void getLocation(){
                         Toast.LENGTH_LONG).show();
             }
         }
+        saveAlarmToDB("fall");
     }
     @Override
     public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
@@ -502,6 +530,10 @@ private void clearImage(){
                             });
         }
     }
+    public void MyAlarms(View view) {
+        Intent intent = new Intent(getApplicationContext(), AlarmList.class);
+        startActivity(intent);
+    }
 public void setVisibilitys(String t){
     final String f=t;
         if(String.valueOf(t)=="true"){
@@ -556,7 +588,7 @@ public void setVisibilitys(String t){
                     //  Log.i("TAG", "loTime :" + llTimeDiff);
                    // llTimeDiff = 11;
                     Log.i("TAG", " llTimeDiff : " + llTimeDiff);
-                    if (llTimeDiff >= 2) {
+                    if (llTimeDiff >= 1) {
                         moIsMax = true;
                         Log.i("TAG", "max");
                     }
