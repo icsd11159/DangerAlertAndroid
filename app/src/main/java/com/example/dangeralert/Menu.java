@@ -20,6 +20,7 @@ import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -35,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -558,6 +560,7 @@ public void setVisibilitys(String t){
             });
         }
 }
+    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     public void onSensorChanged(SensorEvent event) {
 
@@ -611,45 +614,64 @@ public void setVisibilitys(String t){
                 final Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 
                 ab = 30;
-
+                Aborded=false;
                 setVisibilitys("true");
                 start=false;
+                final Handler handler = new Handler();
+                final Runnable finalizer = new Runnable()
+                {
+                    public void run()
+                    {
+
+
+                        Log.d("handler: ", "yes");
+                        if (Aborded == false ) {
+                            sendFallingAlert();
+                            start = true;
+                            setVisibilitys("false");
+                            ab = 0;
+                        }
+                    }
+                };
+                handler.postDelayed(finalizer, 30000);
+
                 updateTimer.scheduleAtFixedRate(new TimerTask() {
 
                     public void run() {
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                count.setText(String.valueOf(ab));
+                           runOnUiThread(new Runnable() {
+                               @Override
+                               public void run() {
+                                   count.setText(String.valueOf(ab));
+                               }
+                           });
+                           Log.d("RUNinjnn: ", String.valueOf(ab));
+                        if(Aborded == false ){
+                            if( ab>=0) {
+                                Log.d("Playing: ", String.valueOf(ab));
+                                r.play();
                             }
-                        });
-                        Log.d("RUNinjnn: ", String.valueOf(ab));
-
-                        r.play();
-                        ab--;
-                        if (ab == -1) {
-                            updateTimer.cancel();
-
+                         }else{
+                            handler.removeCallbacks(finalizer);
                         }
+                           ab--;
+                           if (ab == -1) {
+                               updateTimer.cancel();
+
+                           }
+
                     }
                 }, 0, 1000);
                 // ab = 0;
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-
-                    public void run() {
-                        Log.d("handler: ", "yes");
-                        if (Aborded == false) {
 
 
-                            sendFallingAlert();
-                            start=true;
-                            setVisibilitys("false");
-                            ab=0;
-                        }
-                    }
-                }, 30000);
+
+
+
+
+
+
+
 
 
                 i = 0;
