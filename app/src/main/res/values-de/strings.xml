@@ -1,6 +1,11 @@
 <?xml version='1.0' encoding="utf-8" ?>
 <resources>
-    <string name="app_name">DangerAlert</string>
+    <string name="app_name">SmartAlert</string>
     <string name="thank_you">Wir Kommen</string>
+    <string name="entermail">Bitte geben Sie Ihre E-Mail-Adresse ein </string>
+    <string name="enterpassword">Bitte geben Sie Ihr Passwort ein</string>
+    <string name="signin">Einloggen</string>
+    <string name="signup">Anmelden</string>
+    <string name="or">Oder wenn Sie sich bereits angemeldet haben ..</string>
 </resources>
 

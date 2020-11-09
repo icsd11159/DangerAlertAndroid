@@ -129,7 +129,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="300dp"
+        android:layout_alignParentRight="true"
         android:onClick="signout"
         android:text="SignOut"
         android:textColor="#3D9886" />

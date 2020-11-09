@@ -1,2 +1,2 @@
-rootProject.name='DangerAlert'
+rootProject.name='SmartAlert'
 include ':app'

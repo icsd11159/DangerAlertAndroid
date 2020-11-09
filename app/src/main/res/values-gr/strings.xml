@@ -1,6 +1,12 @@
 <?xml version='1.0' encoding="utf-8" ?>
 <resources>
-    <string name="app_name">DangerAlert</string>
+    <string name="app_name">SmartAlert</string>
     <string name="thank_you">Καλως΄Ηρθατε</string>
+    <string name="entermail">Παρακαλώ εισάγετε το mail σας</string>
+    <string name="enterpassword">Παρακαλώ εισάγετε τον κωδικό σας</string>
+    <string name="signup">Εγγραφή</string>
+    <string name="signin">Σύνδεση</string>
+    <string name="or">Ή εάν έχετε ήδη συνδεθεί ..</string>
+
 </resources>
 
